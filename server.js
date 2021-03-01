@@ -1,5 +1,4 @@
-
-const express = require("express");
+const express = require('express');
 const app = express();
 const port = 8000;
 
@@ -10,6 +9,7 @@ app.set('view engine', 'ejs');
 
 app.use('/static', express.static("static"));
 
+
 app.use(express.json() );
 app.use(express.urlencoded({extended:true})); 
 
@@ -17,18 +17,21 @@ app.get('/', function (req, res){
   res.render('index');
 });
 
-app.post('/result', function(req, res){
-  const information = req.body;
-  console.log(information);
-  res.render('result', { 
-    name: req.body.name, 
-    ubication: req.body.ubication, 
-    language: req.body.language, 
-    comment: req.body.comment
-  });
+// Lanzamos nuestra aplicación
+const server = app.listen(port, function() {
+  console.log('Escuchando en el puerto ' + port);
 });
 
- app.get('/result', function(req, res){
-}); 
+// Ahora creamos nuestras funciones de Sockets
+const io = require('socket.io')(server);
 
-app.listen( port, () => console.log(`Listening on port: ${port}`) );
+// cuando me conecte con algún cliente
+io.on('connection', function(socket) {
+
+  socket.on('formulario_publicacion', function(inf) {
+    socket.emit('mensaje_actualizado', inf);
+    const lucky = Math.floor(Math.random()* 1000);    
+    socket.emit('numero_aleatorio', {lucky:lucky});
+    //console.log(inf);
+  });
+});
